@@ -1,0 +1,203 @@
+{
+  "project": "WARUNG HRD",
+  "version": 1,
+  "currentTask": "SEC-001",
+  "phases": [
+    {
+      "id": "PHASE-1",
+      "name": "Foundation",
+      "status": "in_progress",
+      "tasks": [
+        {
+          "id": "FOUND-001",
+          "name": "Next.js project",
+          "status": "complete"
+        },
+        {
+          "id": "FOUND-002",
+          "name": "Supabase connection",
+          "status": "complete"
+        },
+        {
+          "id": "FOUND-003",
+          "name": "Authentication",
+          "status": "partial"
+        }
+      ]
+    },
+    {
+      "id": "PHASE-2",
+      "name": "Master Data Produk",
+      "status": "complete",
+      "tasks": [
+        {
+          "id": "PROD-001",
+          "name": "Produk CRUD",
+          "status": "complete"
+        },
+        {
+          "id": "PROD-002",
+          "name": "Search produk",
+          "status": "complete"
+        },
+        {
+          "id": "PROD-003",
+          "name": "Status stok",
+          "status": "complete"
+        },
+        {
+          "id": "PROD-004",
+          "name": "Margin harga",
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "id": "PHASE-3",
+      "name": "Penjualan",
+      "status": "complete",
+      "tasks": [
+        {
+          "id": "SELL-001",
+          "name": "Halaman penjualan",
+          "status": "complete"
+        },
+        {
+          "id": "SELL-002",
+          "name": "Pilih produk dan keranjang",
+          "status": "complete"
+        },
+        {
+          "id": "SELL-003",
+          "name": "Pembayaran dan kembalian",
+          "status": "complete"
+        },
+        {
+          "id": "SELL-004",
+          "name": "Simpan sales dan sale_items",
+          "status": "complete"
+        },
+        {
+          "id": "SELL-005",
+          "name": "Kurangi stok otomatis",
+          "status": "complete"
+        },
+        {
+          "id": "SELL-006",
+          "name": "Validasi transaksi",
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "id": "PHASE-4",
+      "name": "Dashboard",
+      "status": "complete",
+      "tasks": [
+        {
+          "id": "DASH-001",
+          "name": "Navigasi Dashboard / Produk / Penjualan",
+          "status": "complete"
+        },
+        {
+          "id": "DASH-002",
+          "name": "Ringkasan penjualan",
+          "status": "complete"
+        },
+        {
+          "id": "DASH-003",
+          "name": "Ringkasan stok",
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "id": "PHASE-5",
+      "name": "Laporan",
+      "status": "complete",
+      "tasks": [
+        {
+          "id": "REP-001",
+          "name": "Riwayat penjualan",
+          "status": "complete"
+        },
+        {
+          "id": "REP-002",
+          "name": "Laporan harian",
+          "status": "complete"
+        },
+        {
+          "id": "REP-003",
+          "name": "Laporan bulanan",
+          "status": "complete"
+        },
+        {
+          "id": "REP-004",
+          "name": "Rekap keuntungan",
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "id": "PHASE-6",
+      "name": "PWA / Mobile",
+      "status": "complete",
+      "tasks": [
+        {
+          "id": "PWA-001",
+          "name": "Installable PWA",
+          "status": "complete"
+        },
+        {
+          "id": "PWA-002",
+          "name": "Responsive mobile UI",
+          "status": "complete"
+        },
+        {
+          "id": "PWA-003",
+          "name": "Barcode/camera strategy",
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "id": "PHASE-7",
+      "name": "Security",
+      "status": "in_progress",
+      "tasks": [
+        {
+          "id": "SEC-001",
+          "name": "Route protection",
+          "status": "next"
+        },
+        {
+          "id": "SEC-002",
+          "name": "Role/permission model",
+          "status": "planned"
+        },
+        {
+          "id": "SEC-003",
+          "name": "RLS audit",
+          "status": "planned"
+        }
+      ]
+    },
+    {
+      "id": "PHASE-8",
+      "name": "Production",
+      "status": "planned",
+      "tasks": [
+        {
+          "id": "REL-001",
+          "name": "Final build and smoke test",
+          "status": "planned"
+        },
+        {
+          "id": "REL-002",
+          "name": "Deployment verification",
+          "status": "planned"
+        }
+      ]
+    }
+  ]
+}

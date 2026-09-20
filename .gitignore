@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local repair / audit scripts
+.doctor-backup/
+repair-*.mjs
+fix-*.mjs
+patch-*.mjs
+audit-*.mjs
+create-*.mjs
+add-*.mjs
+
+fix-rep-*.cjs
+repair-rep-*.cjs
+
+*.backup-rep0042
+*.backup-rep0042-v2
