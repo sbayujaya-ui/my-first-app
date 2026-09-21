@@ -10,7 +10,8 @@
     "doctor": "node project-doctor.mjs",
     "doctor:fix": "node project-doctor.mjs --fix",
     "doctor:build": "node project-doctor.mjs --fix --build",
-    "wh": "node roadmap-engine.mjs"
+    "wh": "node roadmap-engine.mjs",
+    "check": "npm run doctor && npx tsc --noEmit && node scripts/check-quality.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
