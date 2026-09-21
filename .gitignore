@@ -54,3 +54,5 @@ repair-rep-*.cjs
 
 *.backup-rep0042
 *.backup-rep0042-v2
+.vercel
+.env*
