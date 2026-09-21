@@ -11,7 +11,8 @@
     "doctor:fix": "node project-doctor.mjs --fix",
     "doctor:build": "node project-doctor.mjs --fix --build",
     "wh": "node roadmap-engine.mjs",
-    "check": "npm run doctor && npx tsc --noEmit && node scripts/check-quality.mjs"
+    "check": "npm run doctor && npx tsc --noEmit && node scripts/check-quality.mjs",
+    "inventory:audit": "node scripts/inventory-audit.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
