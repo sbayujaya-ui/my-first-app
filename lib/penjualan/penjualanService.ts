@@ -27,38 +27,23 @@ export async function ambilItemPenjualan(saleId: number) {
     .order("id", { ascending: true });
 }
 
-// =====================================================
-// SIMPAN TRANSAKSI PENJUALAN
-// =====================================================
-
-export async function tambahPenjualan(data: {
-  tanggal?: string;
-  total: number;
-  pembayaran: number;
-  kembalian: number;
-}) {
-  return await supabase
-    .from("sales")
-    .insert(data)
-    .select()
-    .single();
-}
-
-// =====================================================
-// SIMPAN ITEM PENJUALAN
-// =====================================================
-
-export async function tambahItemPenjualan(data: {
-  sale_id: number;
-  product_id: number;
-  harga_beli: number;
-  harga: number;
-  jumlah: number;
-  subtotal: number;
-}) {
-  return await supabase
-    .from("sale_items")
-    .insert(data);
-}
-
 // ===== UPDATE END: WH-PENJUALAN-SERVICE-001 =====
+// =====================================================
+// TRANSAKSI ATOMIC VIA RPC
+// =====================================================
+
+export async function buatTransaksiPenjualan(data: {
+  items: Array<{
+    product_id: number;
+    jumlah: number;
+  }>;
+  pembayaran: number;
+}) {
+  return await supabase.rpc("buat_transaksi_penjualan", {
+    p_items: data.items,
+    p_pembayaran: data.pembayaran,
+  });
+}
+
+
+

@@ -5,8 +5,7 @@
 import { useState } from "react";
 import ProdukPenjualan from "../produk/penjualan/ProdukPenjualan";
 import BarcodeScanner from "../components/BarcodeScanner";
-import { tambahPenjualan, tambahItemPenjualan } from "../../lib/penjualan/penjualanService";
-import { kurangiStokProduk } from "../../lib/produk/produkStockService";
+import { buatTransaksiPenjualan } from "../../lib/penjualan/penjualanService";
 
 type Produk = {
   id: number;
@@ -264,38 +263,16 @@ export default function PenjualanPage() {
       setMenyimpan(true);
 
       const { data: penjualan, error: errorPenjualan } =
-        await tambahPenjualan({
-          total: totalValid,
+        await buatTransaksiPenjualan({
+          items: keranjang.map((item) => ({
+            product_id: item.id,
+            jumlah: item.jumlah,
+          })),
           pembayaran: nilaiPembayaran,
-          kembalian: kembalianValid,
         });
 
       if (errorPenjualan || !penjualan) {
         throw errorPenjualan || new Error("Gagal menyimpan transaksi.");
-      }
-
-      for (const item of keranjang) {
-        const { error: errorItem } = await tambahItemPenjualan({
-          sale_id: penjualan.id,
-          product_id: item.id,
-          harga_beli: Number(item.hargaBeli),
-          harga: item.hargaJual,
-          jumlah: item.jumlah,
-          subtotal: Number(item.hargaJual) * Number(item.jumlah),
-        });
-
-        if (errorItem) {
-          throw errorItem;
-        }
-
-        const { error: errorStok } = await kurangiStokProduk(
-          item.id,
-          item.jumlah
-        );
-
-        if (errorStok) {
-          throw errorStok;
-        }
       }
 
       alert("Transaksi berhasil disimpan.");
@@ -607,3 +584,4 @@ export default function PenjualanPage() {
 }
 
 // ===== UPDATE END: WH-PENJUALAN-PAGE-004 / SELL-004 =====
+
