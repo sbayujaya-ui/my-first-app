@@ -4,10 +4,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "../../utils/supabase/client";
+import {
+  hasPermission,
+  type Permission,
+  type UserRole,
+} from "../../lib/auth/permissions";
 
 type NavItem = {
   label: string;
   href: string;
+  permission: Permission;
 };
 
 type NavGroup = {
@@ -22,6 +28,7 @@ const groups: NavGroup[] = [
       {
         label: "Dashboard",
         href: "/",
+        permission: "dashboard",
       },
     ],
   },
@@ -31,10 +38,12 @@ const groups: NavGroup[] = [
       {
         label: "Penjualan",
         href: "/penjualan",
+        permission: "penjualan",
       },
       {
         label: "Riwayat Penjualan",
         href: "/laporan",
+        permission: "laporan.riwayat",
       },
     ],
   },
@@ -44,10 +53,12 @@ const groups: NavGroup[] = [
       {
         label: "Produk",
         href: "/produk",
+        permission: "produk.view",
       },
       {
         label: "Scan Barcode",
         href: "/scan",
+        permission: "scan",
       },
     ],
   },
@@ -57,14 +68,17 @@ const groups: NavGroup[] = [
       {
         label: "Laporan Harian",
         href: "/laporan/harian",
+        permission: "laporan.harian",
       },
       {
         label: "Laporan Bulanan",
         href: "/laporan/bulanan",
+        permission: "laporan.bulanan",
       },
       {
         label: "Keuntungan",
         href: "/laporan/keuntungan",
+        permission: "laporan.keuntungan",
       },
     ],
   },
@@ -148,6 +162,34 @@ export default function AppShell({
 
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [role, setRole] = useState<UserRole | null>(null);
+
+  useEffect(() => {
+    async function loadRole() {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setRole(null);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.role === "admin" || profile?.role === "kasir") {
+        setRole(profile.role);
+      }
+    }
+
+    loadRole();
+  }, []);
 
   useEffect(() => {
     setOpen(false);
@@ -195,6 +237,17 @@ export default function AppShell({
       setLoggingOut(false);
     }
   }
+
+  const visibleGroups = role
+    ? groups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) =>
+            hasPermission(role, item.permission)
+          ),
+        }))
+        .filter((group) => group.items.length > 0)
+    : [];
 
   return (
     <div className="min-h-screen bg-slate-50 text-[var(--wh-text)]">
@@ -287,7 +340,7 @@ export default function AppShell({
           className="flex-1 overflow-y-auto px-3 py-5"
         >
           <div className="space-y-6">
-            {groups.map((group) => (
+            {visibleGroups.map((group) => (
               <section key={group.label}>
                 <p className="mb-2 px-3 text-[10px] font-bold tracking-[0.16em] text-slate-400">
                   {group.label}
@@ -371,4 +424,3 @@ export default function AppShell({
     </div>
   );
 }
-

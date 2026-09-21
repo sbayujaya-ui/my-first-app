@@ -1,52 +1,118 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createClient } from "../../../utils/supabase/client";
+import {
+  hasPermission,
+  type Permission,
+  type UserRole,
+} from "../../../lib/auth/permissions";
 
-const fiturUtama = [
+const fiturUtama: Array<{
+  judul: string;
+  deskripsi: string;
+  href: string;
+  label: string;
+  permission: Permission;
+}> = [
   {
     judul: "Produk",
     deskripsi: "Kelola produk, harga, stok, dan margin.",
     href: "/produk",
     label: "Buka Produk",
+    permission: "produk.view",
   },
   {
     judul: "Penjualan",
     deskripsi: "Buat transaksi dan kelola keranjang penjualan.",
     href: "/penjualan",
     label: "Buka Penjualan",
+    permission: "penjualan",
   },
   {
     judul: "Scan Barcode",
     deskripsi: "Cari produk menggunakan kode atau kamera.",
     href: "/scan",
     label: "Buka Scanner",
+    permission: "scan",
   },
 ];
 
-const fiturLaporan = [
+const fiturLaporan: Array<{
+  judul: string;
+  deskripsi: string;
+  href: string;
+  permission: Permission;
+}> = [
   {
     judul: "Riwayat Penjualan",
     deskripsi: "Lihat seluruh transaksi yang sudah tersimpan.",
     href: "/laporan",
+    permission: "laporan.riwayat",
   },
   {
     judul: "Laporan Harian",
     deskripsi: "Lihat penjualan berdasarkan tanggal.",
     href: "/laporan/harian",
+    permission: "laporan.harian",
   },
   {
     judul: "Laporan Bulanan",
     deskripsi: "Lihat rekap penjualan berdasarkan bulan.",
     href: "/laporan/bulanan",
+    permission: "laporan.bulanan",
   },
   {
     judul: "Keuntungan",
     deskripsi: "Lihat rekap omzet, modal, dan keuntungan.",
     href: "/laporan/keuntungan",
+    permission: "laporan.keuntungan",
   },
 ];
 
 export default function DashboardFeatureNavigation() {
+  const [role, setRole] = useState<UserRole | null>(null);
+
+  useEffect(() => {
+    async function loadRole() {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setRole(null);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.role === "admin" || profile?.role === "kasir") {
+        setRole(profile.role);
+      }
+    }
+
+    loadRole();
+  }, []);
+
+  if (!role) {
+    return null;
+  }
+
+  const fiturUtamaVisible = fiturUtama.filter((fitur) =>
+    hasPermission(role, fitur.permission)
+  );
+
+  const fiturLaporanVisible = fiturLaporan.filter((fitur) =>
+    hasPermission(role, fitur.permission)
+  );
+
   return (
     <section
       className="mt-6 space-y-6"
@@ -63,12 +129,12 @@ export default function DashboardFeatureNavigation() {
           </h2>
 
           <p className="mt-1 text-sm text-slate-600">
-            Semua fungsi utama Warung HRD dapat ditemukan dari Dashboard.
+            Fitur yang tersedia disesuaikan dengan hak akses pengguna.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {fiturUtama.map((fitur) => (
+          {fiturUtamaVisible.map((fitur) => (
             <Link
               key={fitur.href}
               href={fitur.href}
@@ -101,12 +167,12 @@ export default function DashboardFeatureNavigation() {
           </h2>
 
           <p className="mt-1 text-sm text-slate-600">
-            Akses seluruh laporan penjualan dan keuntungan.
+            Akses laporan sesuai dengan hak akses pengguna.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {fiturLaporan.map((fitur) => (
+          {fiturLaporanVisible.map((fitur) => (
             <Link
               key={fitur.href}
               href={fitur.href}
@@ -130,5 +196,3 @@ export default function DashboardFeatureNavigation() {
     </section>
   );
 }
-
-// ===== UPDATE END: WH-DASHBOARD-FEATURE-NAV-001 / DASH-004 =====

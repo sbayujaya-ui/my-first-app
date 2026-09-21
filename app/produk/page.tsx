@@ -1,5 +1,3 @@
-// ===== UPDATE START: WH-PRODUK-PAGE-003 =====
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,6 +8,12 @@ import ProdukSearch from "../components/produk/ProdukSearch";
 import ProdukForm from "../components/produk/ProdukForm";
 import ProdukTable from "../components/produk/ProdukTable";
 import ProdukInfo from "../components/produk/ProdukInfo";
+
+import { createClient } from "../../utils/supabase/client";
+import {
+  hasPermission,
+  type UserRole,
+} from "../../lib/auth/permissions";
 
 import {
   ambilSemuaProduk,
@@ -30,6 +34,7 @@ type Produk = {
 export default function ProdukPage() {
   const [produk, setProduk] = useState<Produk[]>([]);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<UserRole | null>(null);
 
   const [searchProduk, setSearchProduk] = useState("");
 
@@ -43,6 +48,45 @@ export default function ProdukPage() {
 
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const canManage =
+    role !== null && hasPermission(role, "produk.manage");
+
+  // =========================================================
+  // AMBIL ROLE USER
+  // =========================================================
+
+  useEffect(() => {
+    async function loadRole() {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setRole(null);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (
+        profile?.role === "admin" ||
+        profile?.role === "kasir"
+      ) {
+        setRole(profile.role);
+      } else {
+        setRole(null);
+      }
+    }
+
+    loadRole();
+  }, []);
 
   // =========================================================
   // AMBIL DATA PRODUK
@@ -122,6 +166,10 @@ export default function ProdukPage() {
   // =========================================================
 
   const mulaiEdit = (item: Produk) => {
+    if (!canManage) {
+      return;
+    }
+
     setEditId(item.id);
     setNamaProduk(item.nama);
     setHargaBeli(String(item.hargaBeli));
@@ -135,6 +183,10 @@ export default function ProdukPage() {
   // =========================================================
 
   const handleSimpan = async () => {
+    if (!canManage) {
+      return;
+    }
+
     const nama = namaProduk.trim();
     const beli = Number(hargaBeli);
     const jual = Number(hargaJual);
@@ -173,10 +225,7 @@ export default function ProdukPage() {
     setSaving(true);
 
     try {
-      // =======================================================
       // MODE EDIT
-      // =======================================================
-
       if (editId !== null) {
         const { error } = await updateProduk(editId, {
           nama,
@@ -199,14 +248,12 @@ export default function ProdukPage() {
         return;
       }
 
-      // =======================================================
       // MODE TAMBAH
-      // =======================================================
-
       const kode = generateKodeProduk();
 
       const kodeSudahAda = produk.some(
-        (item) => item.kode.toLowerCase() === kode.toLowerCase()
+        (item) =>
+          item.kode.toLowerCase() === kode.toLowerCase()
       );
 
       if (kodeSudahAda) {
@@ -254,6 +301,10 @@ export default function ProdukPage() {
   // =========================================================
 
   const handleHapus = async (item: Produk) => {
+    if (!canManage) {
+      return;
+    }
+
     const konfirmasi = window.confirm(
       `Hapus produk "${item.nama}" (${item.kode})?\n\nData yang sudah dihapus tidak dapat dikembalikan.`
     );
@@ -323,16 +374,16 @@ export default function ProdukPage() {
   return (
     <main className="min-h-screen bg-gray-100 p-6">
       <div className="mx-auto max-w-7xl">
-
         <ProdukHeader />
 
         <ProdukActions
           showForm={showForm}
           setShowForm={setShowForm}
+          canManage={canManage}
         />
 
         <ProdukForm
-          showForm={showForm}
+          showForm={showForm && canManage}
           editId={editId}
           namaProduk={namaProduk}
           setNamaProduk={setNamaProduk}
@@ -361,6 +412,7 @@ export default function ProdukPage() {
           mulaiEdit={mulaiEdit}
           handleHapus={handleHapus}
           deletingId={deletingId}
+          canManage={canManage}
         />
 
         <ProdukInfo
@@ -368,10 +420,7 @@ export default function ProdukPage() {
           jumlahTotal={jumlahTotal}
           searchProduk={searchProduk}
         />
-
       </div>
     </main>
   );
 }
-
-// ===== UPDATE END: WH-PRODUK-PAGE-003 =====

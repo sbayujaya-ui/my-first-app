@@ -1,13 +1,15 @@
 type ProdukActionsProps = {
   showForm: boolean;
   setShowForm: (value: boolean) => void;
+  canManage: boolean;
 };
 
 export default function ProdukActions({
   showForm,
   setShowForm,
+  canManage,
 }: ProdukActionsProps) {
-  if (showForm) return null;
+  if (showForm || !canManage) return null;
 
   return (
     <button
