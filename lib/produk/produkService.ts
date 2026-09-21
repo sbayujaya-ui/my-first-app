@@ -1,5 +1,3 @@
-﻿// ===== UPDATE START: WH-REFACTOR-PRODUK-002C =====
-
 import { createClient } from "../../utils/supabase/client";
 
 const supabase = createClient();
@@ -11,16 +9,20 @@ export async function ambilSemuaProduk() {
     .order("created_at", { ascending: true });
 }
 
-export async function tambahProduk(data: {
+export async function tambahProdukDenganStokAwal(data: {
   kode: string;
   nama: string;
   harga_beli: number;
   harga_jual: number;
-  stok: number;
+  stok_awal: number;
 }) {
-  return await supabase
-    .from("products")
-    .insert(data);
+  return await supabase.rpc("tambah_produk_dengan_stok_awal", {
+    p_kode: data.kode,
+    p_nama: data.nama,
+    p_harga_beli: data.harga_beli,
+    p_harga_jual: data.harga_jual,
+    p_stok_awal: data.stok_awal,
+  });
 }
 
 export async function updateProduk(
@@ -29,7 +31,6 @@ export async function updateProduk(
     nama: string;
     harga_beli: number;
     harga_jual: number;
-    stok: number;
   }
 ) {
   return await supabase
@@ -44,5 +45,3 @@ export async function hapusProduk(id: number) {
     .delete()
     .eq("id", id);
 }
-
-// ===== UPDATE END: WH-REFACTOR-PRODUK-002C =====

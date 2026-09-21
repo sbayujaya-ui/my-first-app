@@ -6,6 +6,7 @@ import ProdukHeader from "../components/produk/ProdukHeader";
 import ProdukActions from "../components/produk/ProdukActions";
 import ProdukSearch from "../components/produk/ProdukSearch";
 import ProdukForm from "../components/produk/ProdukForm";
+import ProdukStockForm from "../components/produk/ProdukStockForm";
 import ProdukTable from "../components/produk/ProdukTable";
 import ProdukInfo from "../components/produk/ProdukInfo";
 
@@ -17,10 +18,12 @@ import {
 
 import {
   ambilSemuaProduk,
-  tambahProduk,
+  tambahProdukDenganStokAwal,
   updateProduk,
   hapusProduk,
 } from "../../lib/produk/produkService";
+
+import { tambahStokProduk } from "../../lib/produk/produkStockService";
 
 type Produk = {
   id: number;
@@ -44,17 +47,21 @@ export default function ProdukPage() {
   const [namaProduk, setNamaProduk] = useState("");
   const [hargaBeli, setHargaBeli] = useState("");
   const [hargaJual, setHargaJual] = useState("");
-  const [stok, setStok] = useState("");
+  const [stokAwal, setStokAwal] = useState("");
+
+  const [showStockForm, setShowStockForm] = useState(false);
+  const [stockProductId, setStockProductId] = useState<number | null>(null);
+  const [stockProductName, setStockProductName] = useState("");
+  const [stockCurrent, setStockCurrent] = useState(0);
+  const [stockJumlah, setStockJumlah] = useState("");
+  const [stockKeterangan, setStockKeterangan] = useState("");
 
   const [saving, setSaving] = useState(false);
+  const [stockSaving, setStockSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const canManage =
     role !== null && hasPermission(role, "produk.manage");
-
-  // =========================================================
-  // AMBIL ROLE USER
-  // =========================================================
 
   useEffect(() => {
     async function loadRole() {
@@ -87,10 +94,6 @@ export default function ProdukPage() {
 
     loadRole();
   }, []);
-
-  // =========================================================
-  // AMBIL DATA PRODUK
-  // =========================================================
 
   const ambilProduk = async () => {
     setLoading(true);
@@ -126,10 +129,6 @@ export default function ProdukPage() {
     ambilProduk();
   }, []);
 
-  // =========================================================
-  // GENERATE KODE PRODUK
-  // =========================================================
-
   const generateKodeProduk = () => {
     let nomorTerbesar = 0;
 
@@ -148,39 +147,53 @@ export default function ProdukPage() {
     return `P${String(nomorTerbesar + 1).padStart(3, "0")}`;
   };
 
-  // =========================================================
-  // RESET FORM
-  // =========================================================
-
   const resetForm = () => {
     setShowForm(false);
     setEditId(null);
     setNamaProduk("");
     setHargaBeli("");
     setHargaJual("");
-    setStok("");
+    setStokAwal("");
   };
 
-  // =========================================================
-  // MULAI EDIT
-  // =========================================================
+  const resetStockForm = () => {
+    setShowStockForm(false);
+    setStockProductId(null);
+    setStockProductName("");
+    setStockCurrent(0);
+    setStockJumlah("");
+    setStockKeterangan("");
+  };
 
   const mulaiEdit = (item: Produk) => {
     if (!canManage) {
       return;
     }
 
+    resetStockForm();
+
     setEditId(item.id);
     setNamaProduk(item.nama);
     setHargaBeli(String(item.hargaBeli));
     setHargaJual(String(item.hargaJual));
-    setStok(String(item.stok));
+    setStokAwal("");
     setShowForm(true);
   };
 
-  // =========================================================
-  // SIMPAN PRODUK
-  // =========================================================
+  const mulaiTambahStok = (item: Produk) => {
+    if (!canManage) {
+      return;
+    }
+
+    resetForm();
+
+    setStockProductId(item.id);
+    setStockProductName(item.nama);
+    setStockCurrent(item.stok);
+    setStockJumlah("");
+    setStockKeterangan("");
+    setShowStockForm(true);
+  };
 
   const handleSimpan = async () => {
     if (!canManage) {
@@ -190,7 +203,6 @@ export default function ProdukPage() {
     const nama = namaProduk.trim();
     const beli = Number(hargaBeli);
     const jual = Number(hargaJual);
-    const jumlahStok = Number(stok);
 
     if (!nama) {
       alert("Nama produk wajib diisi.");
@@ -207,11 +219,6 @@ export default function ProdukPage() {
       return;
     }
 
-    if (!Number.isInteger(jumlahStok) || jumlahStok < 0) {
-      alert("Stok harus berupa angka bulat 0 atau lebih.");
-      return;
-    }
-
     if (jual < beli) {
       const lanjut = window.confirm(
         "Harga jual lebih rendah daripada harga beli.\n\nLanjutkan menyimpan?"
@@ -222,16 +229,24 @@ export default function ProdukPage() {
       }
     }
 
+    const jumlahStokAwal = Number(stokAwal);
+
+    if (
+      editId === null &&
+      (!Number.isInteger(jumlahStokAwal) || jumlahStokAwal < 0)
+    ) {
+      alert("Stok awal harus berupa angka bulat 0 atau lebih.");
+      return;
+    }
+
     setSaving(true);
 
     try {
-      // MODE EDIT
       if (editId !== null) {
         const { error } = await updateProduk(editId, {
           nama,
           harga_beli: beli,
           harga_jual: jual,
-          stok: jumlahStok,
         });
 
         if (error) {
@@ -248,7 +263,6 @@ export default function ProdukPage() {
         return;
       }
 
-      // MODE TAMBAH
       const kode = generateKodeProduk();
 
       const kodeSudahAda = produk.some(
@@ -263,12 +277,12 @@ export default function ProdukPage() {
         return;
       }
 
-      const { error } = await tambahProduk({
+      const { error } = await tambahProdukDenganStokAwal({
         kode,
         nama,
         harga_beli: beli,
         harga_jual: jual,
-        stok: jumlahStok,
+        stok_awal: jumlahStokAwal,
       });
 
       if (error) {
@@ -296,9 +310,48 @@ export default function ProdukPage() {
     }
   };
 
-  // =========================================================
-  // HAPUS PRODUK
-  // =========================================================
+  const handleTambahStok = async () => {
+    if (!canManage) {
+      return;
+    }
+
+    if (stockProductId === null) {
+      alert("Produk belum dipilih.");
+      return;
+    }
+
+    const jumlah = Number(stockJumlah);
+
+    if (!Number.isInteger(jumlah) || jumlah <= 0) {
+      alert("Jumlah stok masuk harus berupa angka bulat lebih dari 0.");
+      return;
+    }
+
+    setStockSaving(true);
+
+    try {
+      const { error } = await tambahStokProduk(
+        stockProductId,
+        jumlah,
+        stockKeterangan.trim() || undefined
+      );
+
+      if (error) {
+        console.error("Gagal menambah stok:", error.message);
+        alert("Gagal menambah stok: " + error.message);
+        return;
+      }
+
+      alert(
+        `Stok ${stockProductName} berhasil ditambah ${jumlah}.`
+      );
+
+      resetStockForm();
+      await ambilProduk();
+    } finally {
+      setStockSaving(false);
+    }
+  };
 
   const handleHapus = async (item: Produk) => {
     if (!canManage) {
@@ -343,10 +396,6 @@ export default function ProdukPage() {
     }
   };
 
-  // =========================================================
-  // FILTER SEARCH
-  // =========================================================
-
   const produkTersaring = produk.filter((item) => {
     const kataPencarian = searchProduk.trim().toLowerCase();
 
@@ -360,16 +409,8 @@ export default function ProdukPage() {
     );
   });
 
-  // =========================================================
-  // JUMLAH DATA
-  // =========================================================
-
   const jumlahTotal = produk.length;
   const jumlahHasil = produkTersaring.length;
-
-  // =========================================================
-  // RENDER
-  // =========================================================
 
   return (
     <main className="min-h-screen bg-gray-100 p-6">
@@ -377,7 +418,7 @@ export default function ProdukPage() {
         <ProdukHeader />
 
         <ProdukActions
-          showForm={showForm}
+          showForm={showForm || showStockForm}
           setShowForm={setShowForm}
           canManage={canManage}
         />
@@ -391,11 +432,24 @@ export default function ProdukPage() {
           setHargaBeli={setHargaBeli}
           hargaJual={hargaJual}
           setHargaJual={setHargaJual}
-          stok={stok}
-          setStok={setStok}
+          stokAwal={stokAwal}
+          setStokAwal={setStokAwal}
           saving={saving}
           handleSimpan={handleSimpan}
           resetForm={resetForm}
+        />
+
+        <ProdukStockForm
+          show={showStockForm && canManage}
+          namaProduk={stockProductName}
+          stokSekarang={stockCurrent}
+          jumlah={stockJumlah}
+          setJumlah={setStockJumlah}
+          keterangan={stockKeterangan}
+          setKeterangan={setStockKeterangan}
+          saving={stockSaving}
+          handleSimpan={handleTambahStok}
+          resetForm={resetStockForm}
         />
 
         <ProdukSearch
@@ -410,6 +464,7 @@ export default function ProdukPage() {
           produkTersaring={produkTersaring}
           searchProduk={searchProduk}
           mulaiEdit={mulaiEdit}
+          mulaiTambahStok={mulaiTambahStok}
           handleHapus={handleHapus}
           deletingId={deletingId}
           canManage={canManage}

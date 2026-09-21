@@ -17,6 +17,7 @@ type ProdukTableProps = {
   produkTersaring: Produk[];
   searchProduk: string;
   mulaiEdit: (item: Produk) => void;
+  mulaiTambahStok: (item: Produk) => void;
   handleHapus: (item: Produk) => void | Promise<void>;
   deletingId: number | null;
   canManage: boolean;
@@ -27,6 +28,7 @@ export default function ProdukTable({
   produkTersaring,
   searchProduk,
   mulaiEdit,
+  mulaiTambahStok,
   handleHapus,
   deletingId,
   canManage,
@@ -146,6 +148,13 @@ export default function ProdukTable({
                             className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
                           >
                             Edit
+                          </button>
+
+                          <button
+                            onClick={() => mulaiTambahStok(item)}
+                            className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                          >
+                            + Stok
                           </button>
 
                           <button
