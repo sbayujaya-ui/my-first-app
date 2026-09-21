@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "========================================"
@@ -13,14 +13,14 @@ if ([string]::IsNullOrWhiteSpace($phase)) {
     Write-Host ""
     Write-Host "Contoh:"
     Write-Host "  .\phase-executor.ps1 SEC-008"
-    exit 1
+    return
 }
 
 $phase = $phase.TrimEnd('\','/',' ')
 
 if ($phase -notmatch '^[A-Za-z0-9_-]+$') {
     Write-Host "ERROR: Nama phase tidak valid: $phase"
-    exit 1
+    return
 }
 
 $phaseDir = Join-Path ".\scripts\phases" $phase
@@ -159,7 +159,7 @@ foreach ($step in $steps) {
         Write-Host " PHASE STOPPED"
         Write-Host "========================================"
         Write-Host "Passed: $passed / $($steps.Count)"
-        exit 1
+    return
     }
 }
 
