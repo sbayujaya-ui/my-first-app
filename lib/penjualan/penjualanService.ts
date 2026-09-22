@@ -11,7 +11,7 @@ const supabase = createClient();
 export async function ambilSemuaPenjualan() {
   return await supabase
     .from("sales")
-    .select("*")
+    .select("id,tanggal,total,pembayaran,kembalian,created_at")
     .order("tanggal", { ascending: false });
 }
 
