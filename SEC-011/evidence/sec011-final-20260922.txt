@@ -1,0 +1,134 @@
+============================================================
+SEC-011 FINAL EVIDENCE
+============================================================
+Date: 2026-09-22 20:04:59
+
+[1] GIT STATE
+Branch: main
+HEAD: 61fd38c88a509724bf1cd47cd2e61d96e329f017
+Last Commit: 61fd38c SEC-011 Enforce route-level permission boundaries
+Branch Check: PASS
+Remote Status: ## main...origin/main
+Remote Sync: REVIEW
+
+[2] SEC-011 COMMIT VERIFICATION
+SEC-011 Commit Message: PASS
+Current Commit Files:
+  A	app/DashboardPageClient.tsx
+  A	app/laporan/LaporanPageClient.tsx
+  A	app/laporan/harian/LaporanHarianPageClient.tsx
+  M	app/laporan/harian/page.tsx
+  M	app/laporan/page.tsx
+  M	app/page.tsx
+  A	app/produk/ProdukPageClient.tsx
+  M	app/produk/page.tsx
+  A	app/scan/ScanPageClient.tsx
+  M	app/scan/page.tsx
+  M	tsconfig.json
+
+[3] ROUTE FILE VERIFICATION
+PASS app/page.tsx
+PASS app/produk/page.tsx
+PASS app/penjualan/page.tsx
+PASS app/scan/page.tsx
+PASS app/laporan/page.tsx
+PASS app/laporan/harian/page.tsx
+PASS app/laporan/bulanan/page.tsx
+PASS app/laporan/keuntungan/page.tsx
+Route File Audit: PASS
+
+[4] ROUTE PERMISSION MATRIX
+PASS app/page.tsx -> dashboard
+PASS app/produk/page.tsx -> produk.view
+PASS app/penjualan/page.tsx -> penjualan
+PASS app/scan/page.tsx -> scan
+PASS app/laporan/page.tsx -> laporan.riwayat
+PASS app/laporan/harian/page.tsx -> laporan.harian
+PASS app/laporan/bulanan/page.tsx -> laporan.bulanan
+PASS app/laporan/keuntungan/page.tsx -> laporan.keuntungan
+Permission Matrix Audit: PASS
+
+[5] CLIENT COMPONENT VERIFICATION
+PASS app/DashboardPageClient.tsx
+PASS app/produk/ProdukPageClient.tsx
+PASS app/scan/ScanPageClient.tsx
+PASS app/laporan/LaporanPageClient.tsx
+PASS app/laporan/harian/LaporanHarianPageClient.tsx
+Client Component Audit: PASS
+
+[6] TYPESCRIPT
+TypeScript: PASS
+
+[7] PRODUCTION BUILD
+
+> my-first-app@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.3.5 (Turbopack)
+- Environments: .env.local
+Γ£ô Running next.config.ts took 291ms
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 4.8s
+  Running TypeScript ...
+  Finished TypeScript in 5.4s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/13) ...
+  Generating static pages using 7 workers (3/13)
+  Generating static pages using 7 workers (6/13)
+  Generating static pages using 7 workers (9/13)
+Γ£ô Generating static pages using 7 workers (13/13) in 1211ms
+  Finalizing page optimization ...
+
+Route (app)
+Γöî ╞Æ /
+Γö£ Γùï /_not-found
+Γö£ ╞Æ /laporan
+Γö£ ╞Æ /laporan/bulanan
+Γö£ ╞Æ /laporan/harian
+Γö£ ╞Æ /laporan/keuntungan
+Γö£ Γùï /login
+Γö£ Γùï /manifest.webmanifest
+Γö£ ╞Æ /penjualan
+Γö£ ╞Æ /produk
+Γöö ╞Æ /scan
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+
+Production Build: PASS
+
+[8] SEC-009 / SEC-010 PROTECTION
+PASS scripts/phases/SEC-009/reporting-baseline.sql
+PASS scripts/phases/SEC-009/reporting-code-audit.ps1
+PASS scripts/phases/SEC-009/cross-report-reconciliation.sql
+PASS scripts/phases/SEC-009/phase6-final-daily-monthly.sql
+PASS scripts/phases/SEC-009/phase6-final-revenue.sql
+PASS scripts/phases/SEC-009/phase6-final-profit.sql
+PASS scripts/phases/SEC-009/phase6-profit-formula-hardening.sql
+PASS scripts/phases/SEC-009/phase6-audit-e.sql
+PASS supabase/migrations/20260922110000_sec010_product_write_hardening.sql
+Protected Security Files: PASS
+
+[9] TEMPORARY ARTIFACT CLEANUP
+PASS removed: SEC-010/auto-backup
+PASS removed: SEC-010/produkService.ts.before-rpc-hardening.bak
+PASS removed: sec010-auto-pipeline.ps1
+PASS removed: sec010-auto-pipeline-v2.ps1
+PASS removed: sec010-auto-pipeline-v3.ps1
+PASS removed: SEC-011/backup-phase2-20260922-193303
+Temporary Artifact Cleanup: PASS
+
+[10] DATABASE
+SEC-011 database modification: NONE
+Database verification during SEC-011: no schema/write changes executed
+
+[11] FINAL RESULT
+SEC-011 FINAL RESULT: PASS
+
+============================================================
+END SEC-011 FINAL EVIDENCE
+============================================================
