@@ -1,50 +1,19 @@
-﻿"use client";
+﻿import { requirePermission } from "../../lib/auth/authService";
+import ScanPageClient from "./ScanPageClient";
 
-import { useState } from "react";
-import Link from "next/link";
-import BarcodeScanner from "../components/BarcodeScanner";
+export default async function ScanPage() {
+  const profile = await requirePermission("scan");
 
-export default function ScanPage() {
-  const [lastCode, setLastCode] = useState("");
-
-  return (
-    <main className="min-h-screen bg-slate-100 p-4 sm:p-6">
-      <div className="mx-auto max-w-xl">
-        <Link
-          href="/penjualan"
-          className="text-sm font-medium text-blue-700"
-        >
-          ← Kembali ke Penjualan
-        </Link>
-
-        <h1 className="mt-4 text-2xl font-bold text-slate-900">
-          Scanner Barcode
-        </h1>
-
-        <p className="mt-1 text-sm text-slate-600">
-          Uji kamera dan pembacaan barcode WARUNG HRD.
+  if (!profile) {
+    return (
+      <main className="p-6">
+        <h1 className="text-xl font-semibold">Akses Ditolak</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Anda tidak memiliki izin untuk menggunakan scanner.
         </p>
+      </main>
+    );
+  }
 
-        <div className="mt-5">
-          <BarcodeScanner onDetected={setLastCode} />
-        </div>
-
-        {lastCode && (
-          <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4">
-            <p className="text-xs font-medium text-green-700">
-              Barcode terakhir terbaca
-            </p>
-
-            <p className="mt-1 text-xl font-bold text-green-900">
-              {lastCode}
-            </p>
-
-            <p className="mt-1 text-xs text-green-700">
-              Scanner berhasil membaca kode.
-            </p>
-          </div>
-        )}
-      </div>
-    </main>
-  );
+  return <ScanPageClient />;
 }
