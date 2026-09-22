@@ -1,0 +1,262 @@
+﻿============================================================
+SEC-010 FINAL SECURITY HARDENING EVIDENCE
+============================================================
+
+Project:
+Warung HRD / my-first-app
+
+Phase:
+SEC-010
+
+Date:
+2026-09-22
+
+============================================================
+1. SOURCE AUTHORIZATION
+============================================================
+
+Route:
+app/penjualan/page.tsx
+
+Result:
+- Route uses requirePermission("penjualan")
+- Unauthorized users receive "Akses Ditolak"
+- Client implementation separated into:
+  app/penjualan/PenjualanPageClient.tsx
+
+Result:
+PASS
+
+
+============================================================
+2. PRODUCT WRITE PATH
+============================================================
+
+File:
+lib/produk/produkService.ts
+
+Product UPDATE:
+updateProduk()
+-> supabase.rpc("update_produk")
+
+Product DELETE:
+hapusProduk()
+-> supabase.rpc("hapus_produk")
+
+Direct products INSERT/UPDATE/UPSERT/DELETE audit:
+0 matches after repair.
+
+Result:
+PASS
+
+
+============================================================
+3. DATABASE RPC AUTHORIZATION
+============================================================
+
+RPCs verified for authenticated EXECUTE:
+
+- update_produk
+- hapus_produk
+- tambah_produk_dengan_stok_awal
+- tambah_stok_produk
+- buat_transaksi_penjualan
+
+Anonymous EXECUTE:
+Not granted for the verified write RPCs.
+
+update_produk():
+- SECURITY DEFINER
+- SET search_path TO public
+- public.is_admin() authorization check
+
+hapus_produk():
+- SECURITY DEFINER
+- SET search_path TO public
+- public.is_admin() authorization check
+- Foreign key protection for product history
+
+Result:
+PASS
+
+
+============================================================
+4. DIRECT TABLE WRITE HARDENING
+============================================================
+
+Client direct write privileges revoked for:
+
+- public.products
+- public.sales
+- public.sale_items
+- public.stock_movements
+
+Revoked operations:
+
+- INSERT
+- UPDATE
+- DELETE
+- TRUNCATE
+- REFERENCES
+- TRIGGER
+
+Post-hardening direct-write privilege verification:
+0 rows for anon/authenticated on the targeted operations.
+
+Authenticated SELECT access remains available where required.
+
+Result:
+PASS
+
+
+============================================================
+5. RLS
+============================================================
+
+RLS remains enabled on the target application tables.
+
+Products policies remain defined for authenticated access,
+including admin-controlled INSERT/UPDATE/DELETE policies.
+
+Sales and sale_items retain authenticated SELECT policies.
+
+RLS configuration was not removed as part of SEC-010.
+
+Result:
+PASS
+
+
+============================================================
+6. APPLICATION VALIDATION
+============================================================
+
+TypeScript:
+PASS
+
+Command:
+npx tsc --noEmit
+
+Next.js build:
+PASS
+
+Command:
+npm run build
+
+Build result included:
+
+- /penjualan as Dynamic / server-rendered
+- /laporan/bulanan as Dynamic
+- /laporan/keuntungan as Dynamic
+
+Result:
+PASS
+
+
+============================================================
+7. SEC-009 PROTECTION
+============================================================
+
+All eight SEC-009 protected files were compared
+against Git HEAD.
+
+Result:
+
+reporting-baseline.sql                  PASS
+reporting-code-audit.ps1                PASS
+cross-report-reconciliation.sql         PASS
+phase6-final-daily-monthly.sql          PASS
+phase6-final-revenue.sql                PASS
+phase6-final-profit.sql                 PASS
+phase6-profit-formula-hardening.sql    PASS
+phase6-audit-e.sql                      PASS
+
+No SEC-009 protected file was modified.
+
+Result:
+PASS
+
+
+============================================================
+8. DATABASE MIGRATION
+============================================================
+
+Migration:
+
+supabase/migrations/
+20260922110000_sec010_product_write_hardening.sql
+
+Migration contains:
+
+- update_produk()
+- hapus_produk()
+- SECURITY DEFINER
+- public.is_admin() checks
+- RPC EXECUTE hardening
+- direct table write privilege hardening
+
+Result:
+PASS
+
+
+============================================================
+9. GIT SAFETY
+============================================================
+
+SEC-010 audit performed with:
+
+Commit:
+NOT EXECUTED during audit
+
+Push:
+NOT EXECUTED during audit
+
+Database modification:
+NOT performed by the final audit itself.
+
+SEC-009 intermediate files remain untracked and were not
+included in the SEC-010 staging plan.
+
+Result:
+PASS
+
+
+============================================================
+FINAL RESULT
+============================================================
+
+SEC-010 FINAL SECURITY HARDENING:
+PASS
+
+Source authorization:
+PASS
+
+Product RPC migration:
+PASS
+
+Direct DML removal:
+PASS
+
+Database privilege hardening:
+PASS
+
+RPC authorization:
+PASS
+
+RLS:
+PASS
+
+TypeScript:
+PASS
+
+Next.js build:
+PASS
+
+SEC-009 protection:
+PASS
+
+Migration:
+PASS
+
+============================================================
+END SEC-010 FINAL EVIDENCE
+============================================================

@@ -1,4 +1,4 @@
-import { createClient } from "../../utils/supabase/client";
+﻿import { createClient } from "../../utils/supabase/client";
 
 const supabase = createClient();
 
@@ -33,15 +33,17 @@ export async function updateProduk(
     harga_jual: number;
   }
 ) {
-  return await supabase
-    .from("products")
-    .update(data)
-    .eq("id", id);
+  return await supabase.rpc("update_produk", {
+    p_id: id,
+    p_nama: data.nama,
+    p_harga_beli: data.harga_beli,
+    p_harga_jual: data.harga_jual,
+  });
 }
 
 export async function hapusProduk(id: number) {
-  return await supabase
-    .from("products")
-    .delete()
-    .eq("id", id);
+  return await supabase.rpc("hapus_produk", {
+    p_id: id,
+  });
 }
+
