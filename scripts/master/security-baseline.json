@@ -1,0 +1,44 @@
+﻿{
+  "project": "Warung HRD",
+  "phase": "SEC-013",
+  "mode": "READ-ONLY",
+  "protectedPhases": [
+    "SEC-009",
+    "SEC-010",
+    "SEC-011",
+    "SEC-012"
+  ],
+  "protectedFiles": [
+    "scripts/phases/SEC-009/reporting-baseline.sql",
+    "scripts/phases/SEC-009/reporting-code-audit.ps1",
+    "scripts/phases/SEC-009/cross-report-reconciliation.sql",
+    "scripts/phases/SEC-009/phase6-final-daily-monthly.sql",
+    "scripts/phases/SEC-009/phase6-final-revenue.sql",
+    "scripts/phases/SEC-009/phase6-final-profit.sql",
+    "scripts/phases/SEC-009/phase6-profit-formula-hardening.sql",
+    "scripts/phases/SEC-009/phase6-audit-e.sql"
+  ],
+  "protectedColumns": [
+    "products.harga_beli",
+    "sale_items.harga_beli"
+  ],
+  "protectedRpc": [
+    "update_produk",
+    "hapus_produk",
+    "tambah_stok_produk",
+    "tambah_produk_dengan_stok_awal",
+    "buat_transaksi_penjualan",
+    "ambil_semua_produk_admin",
+    "ambil_detail_keuntungan_admin"
+  ],
+  "requiredRoutePermissions": {
+    "/": "dashboard",
+    "/produk": "produk.view",
+    "/penjualan": "penjualan",
+    "/scan": "scan",
+    "/laporan": "laporan.riwayat",
+    "/laporan/harian": "laporan.harian",
+    "/laporan/bulanan": "laporan.bulanan",
+    "/laporan/keuntungan": "laporan.keuntungan"
+  }
+}
