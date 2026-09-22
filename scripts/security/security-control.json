@@ -1,0 +1,61 @@
+{
+  "project": "Warung HRD",
+  "stateDir": "scripts/security/.state",
+  "evidenceDir": "scripts/security/evidence",
+  "stateFile": "scripts/security/.state/security-control-state.json",
+  "requiredFiles": [
+    "package.json",
+    "tsconfig.json",
+    "proxy.ts",
+    "lib/auth/authService.ts",
+    "lib/auth/permissions.ts",
+    "lib/produk/produkService.ts",
+    "lib/penjualan/keuntunganService.ts",
+    "lib/penjualan/penjualanService.ts",
+    "supabase/migrations/20260922110000_sec010_product_write_hardening.sql",
+    "supabase/migrations/20260922150000_sec012_data_read_authorization.sql",
+    "scripts/phases/SEC-012/sec012-final-test.ps1",
+    "scripts/master/security-runner.ps1"
+  ],
+  "protectedFiles": [
+    "scripts/phases/SEC-009/reporting-baseline.sql",
+    "scripts/phases/SEC-009/reporting-code-audit.ps1",
+    "scripts/phases/SEC-009/cross-report-reconciliation.sql",
+    "scripts/phases/SEC-009/phase6-final-daily-monthly.sql",
+    "scripts/phases/SEC-009/phase6-final-revenue.sql",
+    "scripts/phases/SEC-009/phase6-final-profit.sql",
+    "scripts/phases/SEC-009/phase6-profit-formula-hardening.sql",
+    "scripts/phases/SEC-009/phase6-audit-e.sql"
+  ],
+  "routeChecks": {
+    "app/page.tsx": "dashboard",
+    "app/produk/page.tsx": "produk.view",
+    "app/penjualan/page.tsx": "penjualan",
+    "app/scan/page.tsx": "scan",
+    "app/laporan/page.tsx": "laporan.riwayat",
+    "app/laporan/harian/page.tsx": "laporan.harian",
+    "app/laporan/bulanan/page.tsx": "laporan.bulanan",
+    "app/laporan/keuntungan/page.tsx": "laporan.keuntungan"
+  },
+  "kasirFiles": [
+    "app/penjualan/PenjualanPageClient.tsx",
+    "app/produk/penjualan/ProdukPenjualan.tsx"
+  ],
+  "profitService": "lib/penjualan/keuntunganService.ts",
+  "forbiddenSelectPatterns": [
+    "\\.from\\([\"']products[\"']\\)\\s*\\.select\\([\"']\\*[\"']",
+    "\\.from\\([\"']sale_items[\"']\\)\\s*\\.select\\([\"']\\*[\"']",
+    "\\.from\\([\"']sales[\"']\\)\\s*\\.select\\([\"']\\*[\"']",
+    "\\.from\\([\"']stock_movements[\"']\\)\\s*\\.select\\([\"']\\*[\"']",
+    "\\.from\\([\"']profiles[\"']\\)\\s*\\.select\\([\"']\\*[\"']"
+  ],
+  "requiredMigrations": [
+    "20260922110000",
+    "20260922150000"
+  ],
+  "releaseFiles": [
+    "scripts/security/security.ps1",
+    "scripts/security/security-control.json"
+  ],
+  "releaseMessage": "SEC-015 Add security control center automation"
+}
