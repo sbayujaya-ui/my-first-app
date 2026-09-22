@@ -131,7 +131,7 @@ export default function LaporanHarianPage() {
 
       const { data, error: queryError } = await supabase
         .from("sale_items")
-        .select("*")
+        .select("id,sale_id,product_id,harga,jumlah,subtotal")
         .eq("sale_id", saleId)
         .order("id", { ascending: true });
 

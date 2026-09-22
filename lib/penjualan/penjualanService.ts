@@ -22,7 +22,7 @@ export async function ambilSemuaPenjualan() {
 export async function ambilItemPenjualan(saleId: number) {
   return await supabase
     .from("sale_items")
-    .select("*")
+    .select("id,sale_id,product_id,harga,jumlah,subtotal")
     .eq("sale_id", saleId)
     .order("id", { ascending: true });
 }
@@ -44,6 +44,3 @@ export async function buatTransaksiPenjualan(data: {
     p_pembayaran: data.pembayaran,
   });
 }
-
-
-

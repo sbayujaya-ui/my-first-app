@@ -17,7 +17,7 @@ import {
 } from "../../lib/auth/permissions";
 
 import {
-  ambilSemuaProduk,
+  ambilSemuaProdukAdmin,
   tambahProdukDenganStokAwal,
   updateProduk,
   hapusProduk,
@@ -98,7 +98,7 @@ export default function ProdukPage() {
   const ambilProduk = async () => {
     setLoading(true);
 
-    const { data, error } = await ambilSemuaProduk();
+    const { data, error } = await ambilSemuaProdukAdmin();
 
     if (error) {
       console.error("Gagal mengambil produk:", error.message);
@@ -110,8 +110,8 @@ export default function ProdukPage() {
     if (data) {
       const dataProduk: Produk[] = data.map((item) => ({
         id: item.id,
-        kode: item.kode,
-        nama: item.nama,
+        kode: item.kode ?? "",
+        nama: item.nama ?? "",
         hargaBeli: Number(item.harga_beli),
         hargaJual: Number(item.harga_jual),
         stok: Number(item.stok),

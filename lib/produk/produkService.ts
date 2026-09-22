@@ -2,11 +2,30 @@
 
 const supabase = createClient();
 
-export async function ambilSemuaProduk() {
+export type ProdukAdminRead = {
+  id: number;
+  created_at: string;
+  kode: string | null;
+  nama: string | null;
+  harga_beli: number | null;
+  harga_jual: number | null;
+  stok: number | null;
+};
+
+export async function ambilProdukOperasional() {
   return await supabase
     .from("products")
-    .select("*")
+    .select("id,kode,nama,harga_jual,stok")
     .order("created_at", { ascending: true });
+}
+
+export async function ambilSemuaProdukAdmin() {
+  const { data, error } = await supabase.rpc("ambil_semua_produk_admin");
+
+  return {
+    data: data as ProdukAdminRead[] | null,
+    error,
+  };
 }
 
 export async function tambahProdukDenganStokAwal(data: {
@@ -46,4 +65,3 @@ export async function hapusProduk(id: number) {
     p_id: id,
   });
 }
-

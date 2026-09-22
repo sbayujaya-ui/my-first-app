@@ -1,4 +1,4 @@
-﻿import { createClient } from "../../utils/supabase/client";
+import { createClient } from "../../utils/supabase/client";
 
 const supabase = createClient();
 
@@ -57,69 +57,17 @@ export async function ambilDetailKeuntungan(
   try {
     const { awal, akhir } = buatRentangBulan(bulan);
 
-    const { data: sales, error: salesError } =
-      await supabase
-        .from("sales")
-        .select("id, tanggal")
-        .gte("tanggal", awal)
-        .lt("tanggal", akhir)
-        .order("tanggal", {
-          ascending: false,
-        });
-
-    if (salesError) {
-      return {
-        data: [],
-        error: new Error(salesError.message),
-      };
-    }
-
-    if (!sales || sales.length === 0) {
-      return {
-        data: [],
-        error: null,
-      };
-    }
-
-    const saleIds = sales.map((sale) => sale.id);
-
     const { data: items, error: itemsError } =
-      await supabase
-        .from("sale_items")
-        .select(
-          `
-          id,
-          sale_id,
-          product_id,
-          harga_beli,
-          harga,
-          jumlah,
-          subtotal,
-          products (
-            nama,
-            kode
-          )
-        `
-        )
-        .in("sale_id", saleIds)
-        .order("id", {
-          ascending: true,
-        });
+      await supabase.rpc("ambil_detail_keuntungan_admin", {
+        p_awal: awal,
+        p_akhir: akhir,
+      });
 
     if (itemsError) {
       return {
         data: [],
         error: new Error(itemsError.message),
       };
-    }
-
-    const tanggalBySale = new Map<number, string>();
-
-    for (const sale of sales) {
-      tanggalBySale.set(
-        Number(sale.id),
-        sale.tanggal
-      );
     }
 
     const hasil: DetailKeuntungan[] = [];
@@ -163,9 +111,7 @@ export async function ambilDetailKeuntungan(
       hasil.push({
         saleId: Number(item.sale_id),
         saleTanggal:
-          tanggalBySale.get(
-            Number(item.sale_id)
-          ) ?? "",
+          item.sale_tanggal ?? "",
         productId: Number(item.product_id),
         productNama:
           produk?.nama ?? "Produk tidak ditemukan",

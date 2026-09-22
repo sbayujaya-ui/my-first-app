@@ -3,13 +3,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ambilSemuaProduk } from "../../../lib/produk/produkService";
+import { ambilProdukOperasional } from "../../../lib/produk/produkService";
 
 type Produk = {
   id: number;
   kode: string;
   nama: string;
-  hargaBeli: number;
   hargaJual: number;
   stok: number;
 };
@@ -28,7 +27,7 @@ export default function ProdukPenjualan({
   const ambilProduk = async () => {
     setLoading(true);
 
-    const { data, error } = await ambilSemuaProduk();
+    const { data, error } = await ambilProdukOperasional();
 
     if (error) {
       console.error("Gagal mengambil produk:", error.message);
@@ -42,7 +41,6 @@ export default function ProdukPenjualan({
         id: item.id,
         kode: item.kode,
         nama: item.nama,
-        hargaBeli: Number(item.harga_beli),
         hargaJual: Number(item.harga_jual),
         stok: Number(item.stok),
       }));

@@ -11,7 +11,6 @@ type Produk = {
   id: number;
   kode: string;
   nama: string;
-  hargaBeli: number;
   hargaJual: number;
   stok: number;
 };
@@ -43,7 +42,7 @@ export default function PenjualanPage() {
       const { data, error } = await supabase
         .from("products")
         .select(
-          "id,nama,kode,harga_beli,harga_jual,stok"
+          "id,nama,kode,harga_jual,stok"
         )
         .eq("kode", code)
         .maybeSingle();
@@ -76,9 +75,6 @@ export default function PenjualanPage() {
         id: Number(data.id),
         kode: String(data.kode ?? ""),
         nama: String(data.nama ?? ""),
-        hargaBeli: Number(
-          data.harga_beli ?? 0
-        ),
         hargaJual: Number(
           data.harga_jual ?? 0
         ),
@@ -189,7 +185,6 @@ export default function PenjualanPage() {
     for (const item of keranjang) {
       const productId = Number(item.id);
       const jumlah = Number(item.jumlah);
-      const hargaBeli = Number(item.hargaBeli);
       const hargaJual = Number(item.hargaJual);
       const stok = Number(item.stok);
 
@@ -212,11 +207,6 @@ export default function PenjualanPage() {
         alert(
           `Stok produk "${item.nama}" tidak mencukupi. Stok tersedia: ${stok}.`
         );
-        return;
-      }
-
-      if (!Number.isFinite(hargaBeli) || hargaBeli < 0) {
-        alert("Harga beli produk tidak valid.");
         return;
       }
 
