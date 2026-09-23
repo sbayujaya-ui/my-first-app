@@ -1,4 +1,4 @@
-param(
+﻿param(
     [ValidateSet("Audit","Full","Resume","Retry","Release")]
     [string]$Mode = "Audit",
     [switch]$ApproveRelease
@@ -31,7 +31,15 @@ function Save-State {
     $State | ConvertTo-Json -Depth 10 | Set-Content -Path $StatePath -Encoding UTF8
 }
 function Log($Text) {
-    $Text | Tee-Object -FilePath $Report -Append
+    $utf8 = New-Object System.Text.UTF8Encoding($false)
+    $writer = New-Object System.IO.StreamWriter($Report, $true, $utf8)
+    try {
+        $writer.WriteLine([string]$Text)
+    }
+    finally {
+        $writer.Dispose()
+    }
+    Write-Host $Text
 }
 function Pass($Text) { Log "[PASS] $Text" }
 function Warn($Text) { Log "[WARN] $Text" }
