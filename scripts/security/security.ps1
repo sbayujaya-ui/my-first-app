@@ -58,12 +58,43 @@ function Run-Phase($Name, [scriptblock]$Action) {
     }
 }
 
+$CheckpointMode = $null
+$CheckpointPhase = $null
+$CheckpointNextPhase = $null
+
 if ($Mode -eq "Resume" -or $Mode -eq "Retry") {
     Assert (Test-Path $StatePath) "No checkpoint exists at $StatePath"
+
     $Saved = Get-Content $StatePath -Raw | ConvertFrom-Json
-    $start = if ($Mode -eq "Retry") { [string]$Saved.phase } else { [string]$Saved.nextPhase }
-    if (-not $start) { $start = "GIT" }
-    Log "[INFO] Resuming from checkpoint: $start"
+
+    Assert ($Saved.mode) "Checkpoint mode is missing."
+    Assert ($Saved.status) "Checkpoint status is missing."
+
+    $CheckpointMode = [string]$Saved.mode
+    $CheckpointPhase = [string]$Saved.phase
+    $CheckpointNextPhase = [string]$Saved.nextPhase
+
+    Assert (
+        $CheckpointMode -in @("Audit","Full","Release")
+    ) "Checkpoint mode '$CheckpointMode' is invalid."
+
+    $start = if ($Mode -eq "Retry") {
+        $CheckpointPhase
+    }
+    else {
+        $CheckpointNextPhase
+    }
+
+    if (-not $start) {
+        $start = "GIT"
+    }
+
+    Log "[INFO] Checkpoint mode: $CheckpointMode"
+    Log "[INFO] Resume/Retry start phase: $start"
+
+    # Preserve the original checkpoint mode during Resume/Retry.
+    # Resume/Retry is a command mode, not the security execution mode.
+    $State.mode = $CheckpointMode
 }
 
 if ($Mode -eq "Release") {
@@ -133,7 +164,7 @@ $Phases = [ordered]@{
     SUPABASE = {
         npx supabase --version
         Assert ($LASTEXITCODE -eq 0) "Supabase CLI unavailable."
-        $m = npx supabase migration list --linked 2>&1
+        $m = cmd /c "npx supabase migration list --linked 2>&1"
         Assert ($LASTEXITCODE -eq 0) "Supabase migration list failed."
         foreach ($id in $Config.requiredMigrations) {
             Assert ($m -match $id) "Required migration missing: $id"
@@ -162,8 +193,51 @@ $Phases = [ordered]@{
     }
 }
 
-$names = @($Phases.Keys)
+# SEC-016 mode-specific phase selection
+$EffectiveMode = $Mode
+
+if ($Mode -eq "Resume" -or $Mode -eq "Retry") {
+    $EffectiveMode = $CheckpointMode
+}
+
+if ($EffectiveMode -eq "Audit") {
+    $PhaseOrder = @(
+        "GIT",
+        "FILES",
+        "AUTH",
+        "READS",
+        "FINAL"
+    )
+}
+elseif ($EffectiveMode -eq "Full") {
+    $PhaseOrder = @(
+        "GIT",
+        "FILES",
+        "AUTH",
+        "READS",
+        "BUILD",
+        "SUPABASE",
+        "FINAL"
+    )
+}
+elseif ($EffectiveMode -eq "Release") {
+    $PhaseOrder = @(
+        "GIT",
+        "FILES",
+        "AUTH",
+        "READS",
+        "BUILD",
+        "SUPABASE",
+        "FINAL"
+    )
+}
+else {
+    throw "Unsupported effective mode '$EffectiveMode'."
+}
+
+$names = @($PhaseOrder)
 $startIndex = 0
+
 if ($Mode -in @("Resume","Retry")) {
     $Saved = Get-Content $StatePath -Raw | ConvertFrom-Json
     $startName = if ($Mode -eq "Retry") { [string]$Saved.phase } else { [string]$Saved.nextPhase }
@@ -175,6 +249,10 @@ if ($Mode -in @("Resume","Retry")) {
 
 for ($i = $startIndex; $i -lt $names.Count; $i++) {
     $name = $names[$i]
+
+    if (-not $Phases.Contains($name)) {
+        throw "Configured phase '$name' does not exist."
+    }
     $ok = Run-Phase $name $Phases[$name]
     if (-not $ok) {
         $State.nextPhase = $name
